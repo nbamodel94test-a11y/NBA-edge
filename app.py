@@ -1071,6 +1071,30 @@ with tab6:
             use_container_width=True,
             hide_index=True
         )
+        minutes_trend_summary = (
+            backtest.groupby(
+                ["Stat", "Minutes Trend"],
+                observed=True
+            )
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Minutes_Model_MAE=("Minutes Absolute Error", "mean")
+            )
+            .reset_index()
+        )
+
+        minutes_trend_summary = minutes_trend_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Minutes_Model_MAE": "Minutes Model MAE"
+        })
+
+        st.subheader("Accuracy by Minutes Trend")
+        st.dataframe(
+            minutes_trend_summary.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
+
         st.subheader("Player-level accuracy")
 
         player_accuracy = (
