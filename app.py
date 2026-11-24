@@ -895,6 +895,7 @@ with tab6:
                 minutes5 = history["minutes"].tail(5).mean()
                 minutes10 = history["minutes"].tail(10).mean()
                 season_minutes = history["minutes"].mean()
+                minutes_volatility = history["minutes"].tail(10).std()
 
                 projected_minutes = (
                     0.50 * minutes5
