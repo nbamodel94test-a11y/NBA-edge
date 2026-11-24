@@ -1034,7 +1034,8 @@ with tab6:
             )
             .agg(
                 Tested_Games=("Actual", "count"),
-                Minutes_MAE=("Minutes Absolute Error", "mean")
+                Minutes_MAE=("Minutes Absolute Error", "mean"),
+                Recent_Minutes_MAE=("Recent Minutes Absolute Error", "mean")
             )
             .reset_index()
         )
