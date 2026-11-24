@@ -943,6 +943,8 @@ with tab6:
                     "Season Absolute Error": abs(season_avg - actual),
                     "Trend Prediction": trend_prediction,
                     "Trend Absolute Error": abs(trend_prediction - actual),
+                    "Minutes Prediction": minutes_prediction,
+                    "Minutes Absolute Error": abs(minutes_prediction - actual),
                 })
 
     backtest = pd.DataFrame(backtest_rows)
