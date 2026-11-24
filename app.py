@@ -867,20 +867,127 @@ with tab5:
         st.warning("Schedule or game analysis feed unavailable.")
 
 with tab6:
+    st.subheader("Model Backtesting")
+
+    st.caption(
+        "Historical walk-forward test: each prediction uses only games "
+        "played before the game being evaluated."
+    )
+
+    backtest_rows = []
+
+    for player_name, player_data in df.groupby("player"):
+        player_data = player_data.sort_values("date")
+
+        for stat in ["points", "rebounds", "assists"]:
+            valid_games = (
+                player_data.dropna(subset=[stat])
+                .reset_index(drop=True)
+            )
+
+            for i in range(5, len(valid_games)):
+                history = valid_games.iloc[:i]
+                actual = valid_games.iloc[i][stat]
+
+                last5 = history[stat].tail(5).mean()
+                last10 = history[stat].tail(10).mean()
+
+                prediction = 0.60 * last5 + 0.40 * last10
+
+                backtest_rows.append({
+                    "Player": player_name,
+                    "Stat": stat.title(),
+                    "Prediction": prediction,
+                    "Actual": actual,
+                    "Error": prediction - actual,
+                    "Absolute Error": abs(prediction - actual),
+                })
+
+    backtest = pd.DataFrame(backtest_rows)
+
+    if not backtest.empty:
+        st.subheader("Overall prediction accuracy")
+
+        summary_rows = []
+
+        for stat in ["Points", "Rebounds", "Assists"]:
+            results = backtest[backtest["Stat"] == stat]
+
+            if results.empty:
+                continue
+
+            mae = results["Absolute Error"].mean()
+            rmse = (
+                (results["Error"] ** 2).mean()
+            ) ** 0.5
+            bias = results["Error"].mean()
+
+            summary_rows.append({
+                "Stat": stat,
+                "Tested Games": len(results),
+                "MAE": round(mae, 2),
+                "RMSE": round(rmse, 2),
+                "Average Bias": round(bias, 2),
+            })
+
+        st.dataframe(
+            pd.DataFrame(summary_rows),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.caption(
+            "MAE = average prediction error. RMSE penalizes larger errors. "
+            "Positive bias means the model tends to overpredict."
+        )
+
+        st.subheader("Player-level accuracy")
+
+        player_accuracy = (
+            backtest.groupby(["Player", "Stat"])
+            .agg(
+                Tested_Games=("Actual", "count"),
+                MAE=("Absolute Error", "mean"),
+                Bias=("Error", "mean"),
+            )
+            .reset_index()
+        )
+
+        player_accuracy = player_accuracy.rename(columns={
+            "Tested_Games": "Tested Games"
+        })
+
+        player_accuracy["MAE"] = player_accuracy["MAE"].round(2)
+        player_accuracy["Bias"] = player_accuracy["Bias"].round(2)
+
+        st.dataframe(
+            player_accuracy.sort_values(
+                ["Stat", "MAE"],
+                ascending=[True, True]
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+
+    else:
+        st.info(
+            "Not enough historical games to backtest. "
+            "Load a larger history window."
+        )
+
+    st.divider()
+
     st.subheader("Data and Model Notes")
 
     st.markdown("""
     - ESPN is the primary source for completed-game box scores.
-    - The dashboard supports 7, 14 and 30-day history windows.
-    - The ESPN injury report is displayed when available.
-    - Demo data is fictional and must never be used for betting.
-    - Automatic injury-replacement rankings are still being developed.
-    - Vegas odds imports, calibrated over/under probabilities,
-      blowout predictions, overtime predictions and backtesting
-      are future features.
+    - Historical windows available: 7, 14 and 30 days.
+    - Injury replacement candidates are statistical estimates.
+    - Historical sportsbook lines are not currently imported.
+    - Backtest results do not guarantee future performance.
+    - More historical data is needed for reliable validation.
     - Always verify injuries and sportsbook lines independently.
     """)
-
 st.divider()
 st.caption(
     f"NBA Edge v0.3 | Data mode: {data_mode} | "
