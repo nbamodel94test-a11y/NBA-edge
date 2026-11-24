@@ -921,6 +921,17 @@ with tab6:
                     + 0.30 * rate10
                     + 0.20 * season_rate
                 )
+                recent_projected_minutes = (
+                    0.70 * minutes5
+                    + 0.20 * minutes10
+                    + 0.10 * season_minutes
+                )
+
+                recent_minutes_prediction = recent_projected_minutes * (
+                    0.70 * rate5
+                    + 0.20 * rate10
+                    + 0.10 * season_rate
+                )
 
                 prediction = 0.60 * last5 + 0.40 * last10
                 trend_prediction = (
