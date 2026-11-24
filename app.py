@@ -903,6 +903,8 @@ with tab6:
                     "Absolute Error": abs(prediction - actual),
                     "Baseline Prediction": last10,
                     "Baseline Absolute Error": abs(last10 - actual),
+                    "Last 5 Prediction": last5,
+                    "Last 5 Absolute Error": abs(last5 - actual),
                 })
 
     backtest = pd.DataFrame(backtest_rows)
