@@ -354,7 +354,7 @@ with st.sidebar:
 
     days = st.selectbox(
         "Recent game history",
-        [7, 14, 30],
+        [7, 14, 30, 60],
         index=1,
         format_func=lambda n: f"Last {n} days"
     )
