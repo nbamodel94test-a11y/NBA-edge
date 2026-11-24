@@ -897,9 +897,9 @@ with tab6:
                 season_minutes = history["minutes"].mean()
 
                 projected_minutes = (
-                    0.70 * minutes5
-                    + 0.20 * minutes10
-                    + 0.10 * season_minutes
+                    0.50 * minutes5
+                    + 0.30 * minutes10
+                    + 0.20 * season_minutes
                 )
 
                 rate5 = (
