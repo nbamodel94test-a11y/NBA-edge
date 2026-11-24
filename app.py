@@ -493,41 +493,82 @@ with tab2:
     for name in players:
         stats = player_stats(df, name)
 
-        if stats["games"] >= min_games:
-            team = (
-                df[df.player == name]
-                .sort_values("date")
-                .iloc[-1]["team"]
-            )
+        if stats["games"] < min_games:
+            continue
 
-            rows.append({
-                "Player": name,
-                "Team": team,
-                "Proj REB": round(stats["rebounds"], 1),
-                "Proj AST": round(stats["assists"], 1),
-                "8+ REB & 8+ AST": f"{stats['joint88']:.0%}",
-                "8+ REB": f"{stats['reb8']:.0%}",
-                "8+ AST": f"{stats['ast8']:.0%}",
-                "Games": stats["games"],
-            })
+        player_games = (
+            df[df["player"] == name]
+            .sort_values("date")
+            .copy()
+        )
+
+        recent5 = player_games.tail(5)
+        recent10 = player_games.tail(10)
+
+        joint5 = (
+            (recent5["rebounds"] >= 8) &
+            (recent5["assists"] >= 8)
+        )
+
+        joint10 = (
+            (recent10["rebounds"] >= 8) &
+            (recent10["assists"] >= 8)
+        )
+
+        joint_all = (
+            (player_games["rebounds"] >= 8) &
+            (player_games["assists"] >= 8)
+        )
+
+        hit5 = joint5.mean()
+        hit10 = joint10.mean()
+        hit_all = joint_all.mean()
+
+        ranking_score = (
+            0.50 * hit5 +
+            0.30 * hit10 +
+            0.20 * hit_all
+        ) * 100
+
+        team = player_games.iloc[-1]["team"]
+
+        avg_minutes = (
+            pd.to_numeric(recent5["minutes"], errors="coerce")
+            .mean()
+        )
+
+        rows.append({
+            "Player": name,
+            "Team": team,
+            "Proj REB": round(stats["rebounds"], 1),
+            "Proj AST": round(stats["assists"], 1),
+            "Last 5 8+8": f"{int(joint5.sum())}/{len(recent5)} ({hit5:.0%})",
+            "Last 10 8+8": f"{int(joint10.sum())}/{len(recent10)} ({hit10:.0%})",
+            "All History 8+8": f"{int(joint_all.sum())}/{len(player_games)} ({hit_all:.0%})",
+            "Last 5 MIN": round(avg_minutes, 1) if pd.notna(avg_minutes) else 0,
+            "Ranking Score": round(ranking_score, 1),
+            "Games": stats["games"],
+        })
 
     result = pd.DataFrame(rows)
 
     if not result.empty:
         st.dataframe(
             result.sort_values(
-                ["8+ REB & 8+ AST", "Proj REB", "Proj AST"],
+                ["Ranking Score", "Proj REB", "Proj AST"],
                 ascending=False
             ),
             use_container_width=True,
             hide_index=True
         )
+    else:
+        st.info("No players match the minimum games requirement.")
 
     st.caption(
-        "The joint percentage counts games where the same player reached "
-        "both 8 rebounds and 8 assists."
+        "8+8 rates show historical games where the same player reached "
+        "both 8 rebounds and 8 assists. Ranking Score prioritizes recent "
+        "results; it is not a calibrated betting probability."
     )
-
 
 with tab3:
     st.subheader("ESPN Injury Report")
