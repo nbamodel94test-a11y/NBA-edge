@@ -885,7 +885,7 @@ with tab6:
                 .reset_index(drop=True)
             )
 
-            for i in range(5, len(valid_games)):
+            for i in range(10, len(valid_games)):
                 history = valid_games.iloc[:i]
                 actual = valid_games.iloc[i][stat]
 
