@@ -983,6 +983,7 @@ with tab6:
                     "Recent Minutes Prediction": recent_minutes_prediction,
                     "Recent Minutes Absolute Error": abs(recent_minutes_prediction - actual), 
                     "Minutes Volatility": minutes_volatility,
+                    "Minutes Trend": minutes_trend,
                 })
 
     backtest = pd.DataFrame(backtest_rows)
