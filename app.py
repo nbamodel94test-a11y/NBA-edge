@@ -897,6 +897,15 @@ with tab6:
                 season_minutes = history["minutes"].mean()
                 minutes_volatility = history["minutes"].tail(10).std()
 
+                minutes_change = minutes5 - minutes10
+
+                if minutes_change >= 3:
+                    minutes_trend = "Increased"
+                elif minutes_change <= -3:
+                    minutes_trend = "Decreased"
+                else:
+                    minutes_trend = "Stable"
+
                 projected_minutes = (
                     0.50 * minutes5
                     + 0.30 * minutes10
