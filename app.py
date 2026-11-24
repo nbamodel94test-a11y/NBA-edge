@@ -892,6 +892,34 @@ with tab6:
                 last5 = history[stat].tail(5).mean()
                 last10 = history[stat].tail(10).mean()
                 season_avg = history[stat].mean()
+                minutes5 = history["minutes"].tail(5).mean()
+                minutes10 = history["minutes"].tail(10).mean()
+                season_minutes = history["minutes"].mean()
+
+                projected_minutes = (
+                    0.50 * minutes5
+                    + 0.30 * minutes10
+                    + 0.20 * season_minutes
+                )
+
+                rate5 = (
+                    history[stat].tail(5).sum()
+                    / history["minutes"].tail(5).sum()
+                )
+                rate10 = (
+                    history[stat].tail(10).sum()
+                    / history["minutes"].tail(10).sum()
+                )
+                season_rate = (
+                    history[stat].sum()
+                    / history["minutes"].sum()
+                )
+
+                minutes_prediction = projected_minutes * (
+                    0.50 * rate5
+                    + 0.30 * rate10
+                    + 0.20 * season_rate
+                )
 
                 prediction = 0.60 * last5 + 0.40 * last10
                 trend_prediction = (
