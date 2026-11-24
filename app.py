@@ -919,15 +919,25 @@ with tab6:
                 continue
 
             mae = results["Absolute Error"].mean()
+            baseline_mae = results["Baseline Absolute Error"].mean()
+
             rmse = (
                 (results["Error"] ** 2).mean()
             ) ** 0.5
+
             bias = results["Error"].mean()
+
+            improvement = (
+                (baseline_mae - mae) / baseline_mae * 100
+                if baseline_mae > 0 else 0
+            )
 
             summary_rows.append({
                 "Stat": stat,
                 "Tested Games": len(results),
-                "MAE": round(mae, 2),
+                "Model MAE": round(mae, 2),
+                "Last 10 MAE": round(baseline_mae, 2),
+                "Improvement %": round(improvement, 1),
                 "RMSE": round(rmse, 2),
                 "Average Bias": round(bias, 2),
             })
