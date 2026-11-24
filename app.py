@@ -620,6 +620,7 @@ with tab4:
     st.subheader("Vegas Line Comparison")
 
     name = st.selectbox("Select player", players, key="vegas_player")
+
     stat = st.selectbox(
         "Market",
         ["points", "rebounds", "assists"]
@@ -643,22 +644,81 @@ with tab4:
         step=5
     )
 
+    player_games = (
+        df[df["player"] == name]
+        .sort_values("date")
+        .copy()
+    )
+
+    player_games[stat] = pd.to_numeric(
+        player_games[stat],
+        errors="coerce"
+    )
+
+    player_games = player_games.dropna(subset=[stat])
+
+    recent5 = player_games.tail(5)
+    recent10 = player_games.tail(10)
+
+    def market_results(games):
+        over = int((games[stat] > line).sum())
+        under = int((games[stat] < line).sum())
+        pushes = int((games[stat] == line).sum())
+        total = len(games)
+
+        return {
+            "Games": total,
+            "Over": f"{over}/{total} ({over / total:.0%})" if total else "N/A",
+            "Under": f"{under}/{total} ({under / total:.0%})" if total else "N/A",
+            "Pushes": pushes,
+        }
+
     st.metric(
         "Baseline projection",
         f"{stats[stat]:.1f}",
         f"{stats[stat] - line:+.1f} vs line"
     )
 
+    st.subheader("Historical performance vs line")
+
+    comparison = pd.DataFrame([
+        {"Period": "Last 5", **market_results(recent5)},
+        {"Period": "Last 10", **market_results(recent10)},
+        {"Period": "All History", **market_results(player_games)},
+    ])
+
+    st.dataframe(
+        comparison,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.subheader("Sportsbook comparison")
+
+    breakeven = break_even(odds)
+
     st.metric(
-        "Odds break-even probability",
-        f"{break_even(odds):.1%}"
+        "Odds break-even percentage",
+        f"{breakeven:.1%}"
+    )
+
+    all_over = (
+        (player_games[stat] > line).mean()
+        if not player_games.empty else 0
+    )
+
+    st.metric(
+        "Historical over rate",
+        f"{all_over:.1%}" if not player_games.empty else "N/A",
+        f"{(all_over - breakeven) * 100:+.1f} percentage points"
+        if not player_games.empty else None
     )
 
     st.warning(
-        "Over/under probability and expected value are not calculated yet. "
-        "We need to validate and backtest the model before showing betting edges."
+        "Historical hit rates are not calibrated future probabilities. "
+        "This comparison does not establish expected value or a betting edge. "
+        "We still need backtesting and validation."
     )
-
 
 with tab5:
     st.subheader("NBA Schedule: Today through next three days")
