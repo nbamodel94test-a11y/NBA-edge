@@ -954,6 +954,7 @@ with tab6:
                 "Last 10 MAE": round(baseline_mae, 2),
                 "Last 5 MAE": round(last5_mae, 2),
                 "Season MAE": round(season_mae, 2),
+                "Trend MAE": round(trend_mae, 2),
                 "Improvement vs Last 10 %": round(
                     (baseline_mae - mae) / baseline_mae * 100, 1
                 ) if baseline_mae > 0 else 0,
