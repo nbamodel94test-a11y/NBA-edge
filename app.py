@@ -891,6 +891,7 @@ with tab6:
 
                 last5 = history[stat].tail(5).mean()
                 last10 = history[stat].tail(10).mean()
+                season_avg = history[stat].mean()
 
                 prediction = 0.60 * last5 + 0.40 * last10
 
