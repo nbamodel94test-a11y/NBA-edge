@@ -921,6 +921,18 @@ with tab6:
                     + 0.30 * rate10
                     + 0.20 * season_rate
                 )
+
+                minutes_change = minutes5 - minutes10
+
+                change_adjusted_minutes = (
+                    projected_minutes + 0.25 * minutes_change
+                )
+
+                change_adjusted_prediction = change_adjusted_minutes * (
+                    0.50 * rate5
+                    + 0.30 * rate10
+                    + 0.20 * season_rate
+                )
                 recent_projected_minutes = (
                     0.70 * minutes5
                     + 0.20 * minutes10
