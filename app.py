@@ -922,7 +922,7 @@ with tab6:
 
             mae = results["Absolute Error"].mean()
             baseline_mae = results["Baseline Absolute Error"].mean()
-            last5_mae = results["Last 5 Absolute Error"].mean())
+            last5_mae = results["Last 5 Absolute Error"].mean()
 
             rmse = (
                 (results["Error"] ** 2).mean()
