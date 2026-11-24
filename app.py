@@ -1007,7 +1007,7 @@ with tab6:
             "Positive bias means the model tends to overpredict."
         )
         
-            volatility_results = backtest.copy()
+        volatility_results = backtest.copy()
         volatility_results["Minutes Volatility Group"] = pd.qcut(
             volatility_results["Minutes Volatility"].rank(method="first"),
             q=3,
