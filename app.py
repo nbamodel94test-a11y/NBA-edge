@@ -916,9 +916,9 @@ with tab6:
                 )
 
                 minutes_prediction = projected_minutes * (
-                    0.50 * rate5
-                    + 0.30 * rate10
-                    + 0.20 * season_rate
+                    0.70 * rate5
+                    + 0.20 * rate10
+                    + 0.10 * season_rate
                 )
 
                 prediction = 0.60 * last5 + 0.40 * last10
