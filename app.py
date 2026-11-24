@@ -270,30 +270,65 @@ def injury_replacements(df, injuries):
         if team_df.empty:
             continue
 
+        injured_games = (
+            team_df[team_df["player"] == injured_player]
+            .sort_values("date")
+        )
+
+        if injured_games.empty:
+            continue
+
+        injured_recent = injured_games.tail(10)
+        injured_minutes = injured_recent["minutes"].mean()
+        injured_rebounds = injured_recent["rebounds"].mean()
+        injured_assists = injured_recent["assists"].mean()
+
+        if injured_minutes >= 30:
+            impact = "HIGH"
+        elif injured_minutes >= 20:
+            impact = "MEDIUM"
+        else:
+            impact = "LOW"
+
         for player in team_df["player"].unique():
             if player.lower() == injured_player.lower():
                 continue
 
-            games = team_df[team_df["player"] == player].sort_values("date")
+            games = (
+                team_df[team_df["player"] == player]
+                .sort_values("date")
+            )
+
             recent = games.tail(5)
             previous = games.iloc[-10:-5]
 
             recent_min = recent["minutes"].mean()
-            previous_min = previous["minutes"].mean() if not previous.empty else recent_min
+            previous_min = (
+                previous["minutes"].mean()
+                if not previous.empty else recent_min
+            )
 
             min_change = recent_min - previous_min
             rebounds = recent["rebounds"].mean()
             assists = recent["assists"].mean()
 
-            score = recent_min + (min_change * 1.5) + (rebounds * 0.5) + (assists * 0.5)
+            score = (
+                recent_min
+                + (min_change * 1.5)
+                + (rebounds * 0.5)
+                + (assists * 0.5)
+            )
 
             rows.append({
                 "Team": team,
                 "Injured Player": injured_player,
                 "Status": status,
+                "Injury Impact": impact,
+                "Injured MIN": round(injured_minutes, 1),
+                "REB Lost": round(injured_rebounds, 1),
+                "AST Lost": round(injured_assists, 1),
                 "Replacement Candidate": player,
                 "Recent MIN": round(recent_min, 1),
-                "Previous MIN": round(previous_min, 1),
                 "MIN Change": round(min_change, 1),
                 "Recent REB": round(rebounds, 1),
                 "Recent AST": round(assists, 1),
