@@ -201,28 +201,46 @@ def player_stats(df, name):
 def injury_table(data):
     rows = []
 
-    for team_group in data.get("injuries", []):
-        team_info = team_group.get("team", {})
+    for item in data.get("injuries", []):
+        nested = item.get("injuries")
 
-        team_name = (
-            team_info.get("displayName")
-            or team_info.get("name")
-            or team_info.get("abbreviation")
-            or ""
-        )
+        if isinstance(nested, list):
+            injury_list = nested
+            team_info = item.get("team", {})
+        else:
+            injury_list = [item]
+            team_info = item.get("team", {})
 
-        for injury in team_group.get("injuries", []):
+        for injury in injury_list:
             athlete = injury.get("athlete", {})
+            athlete_team = athlete.get("team", {})
+
+            if not team_info:
+                team_info = injury.get("team", {}) or athlete_team
+
+            team_name = (
+                team_info.get("displayName")
+                or team_info.get("name")
+                or athlete_team.get("displayName")
+                or athlete_team.get("name")
+                or team_info.get("abbreviation")
+                or athlete_team.get("abbreviation")
+                or ""
+            )
 
             rows.append({
                 "Team": team_name,
                 "Player": athlete.get("displayName", ""),
                 "Status": injury.get("status", ""),
-                "Details": injury.get(
-                    "shortComment",
-                    injury.get("longComment", "")
+                "Details": (
+                    injury.get("shortComment")
+                    or injury.get("longComment")
+                    or injury.get("detail")
+                    or ""
                 ),
             })
+
+            team_info = item.get("team", {})
 
     return pd.DataFrame(rows)
 
