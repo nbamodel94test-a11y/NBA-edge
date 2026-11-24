@@ -201,15 +201,22 @@ def player_stats(df, name):
 def injury_table(data):
     rows = []
 
-    for team in data.get("injuries", []):
-        team_name = team.get("team", {}).get("displayName", "")
+    for team_group in data.get("injuries", []):
+        team_info = team_group.get("team", {})
 
-        for injury in team.get("injuries", []):
+        team_name = (
+            team_info.get("displayName")
+            or team_info.get("name")
+            or team_info.get("abbreviation")
+            or ""
+        )
+
+        for injury in team_group.get("injuries", []):
+            athlete = injury.get("athlete", {})
+
             rows.append({
                 "Team": team_name,
-                "Player": injury.get("athlete", {}).get(
-                    "displayName", ""
-                ),
+                "Player": athlete.get("displayName", ""),
                 "Status": injury.get("status", ""),
                 "Details": injury.get(
                     "shortComment",
