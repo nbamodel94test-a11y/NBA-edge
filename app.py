@@ -934,6 +934,7 @@ with tab6:
             baseline_mae = results["Baseline Absolute Error"].mean()
             last5_mae = results["Last 5 Absolute Error"].mean()
             season_mae = results["Season Absolute Error"].mean()
+            trend_mae = results["Trend Absolute Error"].mean()
 
             rmse = (
                 (results["Error"] ** 2).mean()
