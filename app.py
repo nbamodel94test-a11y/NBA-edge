@@ -957,6 +957,8 @@ with tab6:
                     "Trend Absolute Error": abs(trend_prediction - actual),
                     "Minutes Prediction": minutes_prediction,
                     "Minutes Absolute Error": abs(minutes_prediction - actual),
+                    "Recent Minutes Prediction": recent_minutes_prediction,
+                    "Recent Minutes Absolute Error": abs(recent_minutes_prediction - actual), 
                     "Minutes Volatility": minutes_volatility,
                 })
 
