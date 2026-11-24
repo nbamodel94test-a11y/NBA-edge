@@ -906,6 +906,8 @@ with tab6:
                     "Baseline Absolute Error": abs(last10 - actual),
                     "Last 5 Prediction": last5,
                     "Last 5 Absolute Error": abs(last5 - actual),
+                    "Season Prediction": season_avg,
+                    "Season Absolute Error": abs(season_avg - actual),
                 })
 
     backtest = pd.DataFrame(backtest_rows)
