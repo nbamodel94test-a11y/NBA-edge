@@ -221,6 +221,80 @@ def injury_table(data):
 
 
 def break_even(odds):
+
+    def injury_replacements(df, injuries):
+    rows = []
+
+    if injuries.empty:
+        return pd.DataFrame()
+
+    for _, injury in injuries.iterrows():
+        team = injury["Team"]
+        injured_player = injury["Player"]
+        status = injury["Status"]
+
+        if not team or not injured_player:
+            continue
+
+        team_df = df[df["team"] == team].copy()
+
+        if team_df.empty:
+            continue
+
+        team_players = team_df["player"].unique()
+
+        for player in team_players:
+            if player.lower() == injured_player.lower():
+                continue
+
+            games = (
+                team_df[team_df["player"] == player]
+                .sort_values("date")
+            )
+
+            recent = games.tail(5)
+            previous = games.iloc[-10:-5]
+
+            recent_min = recent["minutes"].mean()
+            previous_min = (
+                previous["minutes"].mean()
+                if not previous.empty else recent_min
+            )
+
+            min_change = recent_min - previous_min
+            rebounds = recent["rebounds"].mean()
+            assists = recent["assists"].mean()
+
+            score = (
+                recent_min
+                + (min_change * 1.5)
+                + (rebounds * 0.5)
+                + (assists * 0.5)
+            )
+
+            rows.append({
+                "Team": team,
+                "Injured Player": injured_player,
+                "Status": status,
+                "Replacement Candidate": player,
+                "Recent MIN": round(recent_min, 1),
+                "Previous MIN": round(previous_min, 1),
+                "MIN Change": round(min_change, 1),
+                "Recent REB": round(rebounds, 1),
+                "Recent AST": round(assists, 1),
+                "Ranking Score": round(score, 1),
+            })
+
+    result = pd.DataFrame(rows)
+
+    if not result.empty:
+        result = result.sort_values(
+            ["Injured Player", "Ranking Score"],
+            ascending=[True, False]
+        )
+        result = result.groupby("Injured Player").head(3)
+
+    return result
     if odds < 0:
         return abs(odds) / (abs(odds) + 100)
     return 100 / (odds + 100)
@@ -424,16 +498,36 @@ with tab3:
                 hide_index=True
             )
 
-    except Exception:
+            st.divider()
+            st.subheader("Potential Injury Replacements")
+
+            replacements = injury_replacements(df, injuries)
+
+            if replacements.empty:
+                st.info(
+                    "No replacement candidates could be matched "
+                    "to the current player game logs."
+                )
+            else:
+                st.caption(
+                    "Top 3 teammates per injured player, ranked using "
+                    "recent minutes, minutes trend, rebounds and assists."
+                )
+
+                st.dataframe(
+                    replacements,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                st.warning(
+                    "These are statistical role candidates, not confirmed "
+                    "injury replacements. The score does not measure usage "
+                    "or prove that a player's role will increase."
+                )
+
+    except Exception as error:
         st.warning("The ESPN injury feed is temporarily unavailable.")
-
-    st.divider()
-    st.info(
-        "Automatic injury-replacement rankings are not enabled yet. "
-        "We will add teammate minutes, usage, rebound and assist opportunities "
-        "in a later update."
-    )
-
 
 with tab4:
     st.subheader("Vegas Line Comparison")
