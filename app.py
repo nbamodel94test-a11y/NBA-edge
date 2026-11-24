@@ -940,7 +940,10 @@ with tab6:
                 "Tested Games": len(results),
                 "Model MAE": round(mae, 2),
                 "Last 10 MAE": round(baseline_mae, 2),
-                "Improvement %": round(improvement, 1),
+                "Last 5 MAE": round(last5_mae, 2),
+                "Improvement vs Last 10 %": round(
+                    (baseline_mae - mae) / baseline_mae * 100, 1
+                ) if baseline_mae > 0 else 0,
                 "RMSE": round(rmse, 2),
                 "Average Bias": round(bias, 2),
             })
