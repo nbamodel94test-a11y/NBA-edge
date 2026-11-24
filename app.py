@@ -1006,7 +1006,32 @@ with tab6:
             "MAE = average prediction error. RMSE penalizes larger errors. "
             "Positive bias means the model tends to overpredict."
         )
+        
+                volatility_results = backtest.copy()
+        volatility_results["Minutes Volatility Group"] = pd.qcut(
+            volatility_results["Minutes Volatility"].rank(method="first"),
+            q=3,
+            labels=["Low", "Medium", "High"]
+        )
 
+        volatility_summary = (
+            volatility_results.groupby(
+                ["Stat", "Minutes Volatility Group"],
+                observed=True
+            )
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Minutes_MAE=("Minutes Absolute Error", "mean")
+            )
+            .reset_index()
+        )
+
+        st.subheader("Accuracy by Minutes Volatility")
+        st.dataframe(
+            volatility_summary.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
         st.subheader("Player-level accuracy")
 
         player_accuracy = (
