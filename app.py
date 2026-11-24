@@ -221,8 +221,12 @@ def injury_table(data):
 
 
 def break_even(odds):
+    if odds < 0:
+        return abs(odds) / (abs(odds) + 100)
+    return 100 / (odds + 100)
 
-    def injury_replacements(df, injuries):
+
+def injury_replacements(df, injuries):
     rows = []
 
     if injuries.empty:
@@ -241,36 +245,22 @@ def break_even(odds):
         if team_df.empty:
             continue
 
-        team_players = team_df["player"].unique()
-
-        for player in team_players:
+        for player in team_df["player"].unique():
             if player.lower() == injured_player.lower():
                 continue
 
-            games = (
-                team_df[team_df["player"] == player]
-                .sort_values("date")
-            )
-
+            games = team_df[team_df["player"] == player].sort_values("date")
             recent = games.tail(5)
             previous = games.iloc[-10:-5]
 
             recent_min = recent["minutes"].mean()
-            previous_min = (
-                previous["minutes"].mean()
-                if not previous.empty else recent_min
-            )
+            previous_min = previous["minutes"].mean() if not previous.empty else recent_min
 
             min_change = recent_min - previous_min
             rebounds = recent["rebounds"].mean()
             assists = recent["assists"].mean()
 
-            score = (
-                recent_min
-                + (min_change * 1.5)
-                + (rebounds * 0.5)
-                + (assists * 0.5)
-            )
+            score = recent_min + (min_change * 1.5) + (rebounds * 0.5) + (assists * 0.5)
 
             rows.append({
                 "Team": team,
@@ -295,10 +285,6 @@ def break_even(odds):
         result = result.groupby("Injured Player").head(3)
 
     return result
-    if odds < 0:
-        return abs(odds) / (abs(odds) + 100)
-    return 100 / (odds + 100)
-
 
 st.title("🏀 NBA EDGE")
 st.caption("NBA player analytics and betting research dashboard")
