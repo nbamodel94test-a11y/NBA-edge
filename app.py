@@ -913,6 +913,8 @@ with tab6:
                     "Last 5 Absolute Error": abs(last5 - actual),
                     "Season Prediction": season_avg,
                     "Season Absolute Error": abs(season_avg - actual),
+                    "Trend Prediction": trend_prediction,
+                    "Trend Absolute Error": abs(trend_prediction - actual),
                 })
 
     backtest = pd.DataFrame(backtest_rows)
