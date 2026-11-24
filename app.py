@@ -721,7 +721,12 @@ with tab4:
     )
 
 with tab5:
-    st.subheader("NBA Schedule: Today through next three days")
+    st.subheader("NBA Schedule & Game Analysis")
+
+    st.caption(
+        "Live game monitoring: score margins, potential blowouts, "
+        "overtime status and combined points."
+    )
 
     try:
         today = dt.date.today()
@@ -746,34 +751,120 @@ with tab5:
                 {}
             )
 
-            status = event.get("status", {}).get(
-                "type", {}
-            ).get("shortDetail", "")
+            status_data = event.get("status", {})
+            status_type = status_data.get("type", {})
+
+            status = status_type.get("shortDetail", "Unknown")
+            state = status_type.get("state", "")
+
+            away_name = away.get("team", {}).get("abbreviation", "?")
+            home_name = home.get("team", {}).get("abbreviation", "?")
+
+            away_score = pd.to_numeric(
+                away.get("score"), errors="coerce"
+            )
+            home_score = pd.to_numeric(
+                home.get("score"), errors="coerce"
+            )
+
+            has_score = (
+                pd.notna(away_score) and
+                pd.notna(home_score)
+            )
+
+            if has_score:
+                margin = abs(away_score - home_score)
+                total_points = away_score + home_score
+                score = f"{int(away_score)} - {int(home_score)}"
+            else:
+                margin = None
+                total_points = None
+                score = "Not started"
+
+            period = status_data.get("period", 0) or 0
+
+            is_overtime = (
+                "OT" in status.upper() or
+                (has_score and period > 4)
+            )
+
+            if is_overtime:
+                ot_signal = "OVERTIME"
+            elif state == "in":
+                ot_signal = "OT possible"
+            else:
+                ot_signal = "Not in OT"
+
+            if state == "in" and has_score:
+                if margin >= 20:
+                    game_signal = "Major blowout watch"
+                elif margin >= 15:
+                    game_signal = "Blowout watch"
+                elif margin <= 5:
+                    game_signal = "Close game"
+                else:
+                    game_signal = "Competitive"
+            elif state == "post" and has_score:
+                game_signal = (
+                    f"Final margin: {int(margin)}"
+                )
+            else:
+                game_signal = "Pregame — no forecast"
 
             rows.append({
-                "Date / Time": event.get("date", "")[:16].replace("T", " "),
-                "Matchup": (
-                    f"{away.get('team', {}).get('abbreviation', '?')} "
-                    f"@ {home.get('team', {}).get('abbreviation', '?')}"
-                ),
+                "Date / Time": event.get(
+                    "date", ""
+                )[:16].replace("T", " "),
+                "Matchup": f"{away_name} @ {home_name}",
                 "Status": status,
-                "Score": (
-                    f"{away.get('score', '')} - {home.get('score', '')}"
-                ),
+                "Score": score,
+                "Margin": round(margin, 0) if margin is not None else "—",
+                "Total Points": int(total_points) if total_points is not None else "—",
+                "Game Signal": game_signal,
+                "OT Status": ot_signal,
             })
 
         if rows:
+            game_table = pd.DataFrame(rows)
+
             st.dataframe(
-                pd.DataFrame(rows),
+                game_table,
                 use_container_width=True,
                 hide_index=True
             )
+
+            live_games = [
+                row for row in rows
+                if row["Status"] and
+                row["Game Signal"] in [
+                    "Major blowout watch",
+                    "Blowout watch",
+                    "Close game"
+                ]
+            ]
+
+            if live_games:
+                st.subheader("Live game alerts")
+
+                for game in live_games:
+                    st.write(
+                        f"**{game['Matchup']}** — "
+                        f"{game['Game Signal']} "
+                        f"({game['Score']})"
+                    )
+
+            st.caption(
+                "Blowout alerts use current score margins, not pregame "
+                "predictions. OT possible is a live-game indicator, "
+                "not a calculated overtime probability. Total points "
+                "are not an over/under prediction without a sportsbook line."
+            )
+
         else:
             st.info("No games returned for this date range.")
 
-    except Exception:
-        st.warning("Schedule feed unavailable. Try refreshing later.")
-
+    except Exception as error:
+        st.warning("Schedule or game analysis feed unavailable.")
 
 with tab6:
     st.subheader("Data and Model Notes")
