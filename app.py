@@ -27,10 +27,27 @@ def fetch_json(url, params=None):
 
 @st.cache_data(ttl=600, show_spinner=False)
 def scoreboard(start, end):
-    return fetch_json(
-        f"{BASE}/scoreboard",
-        {"dates": f"{start}-{end}", "limit": 500}
-    ).get("events", [])
+    first = dt.datetime.strptime(start, "%Y%m%d").date()
+    last = dt.datetime.strptime(end, "%Y%m%d").date()
+
+    events_by_id = {}
+    day = first
+
+    while day <= last:
+        date_key = day.strftime("%Y%m%d")
+        payload = fetch_json(
+            f"{BASE}/scoreboard",
+            {"dates": date_key, "limit": 500}
+        )
+
+        for event in payload.get("events", []):
+            event_id = event.get("id")
+            if event_id:
+                events_by_id[event_id] = event
+
+        day += dt.timedelta(days=1)
+
+    return list(events_by_id.values())
 
 
 @st.cache_data(ttl=14400, show_spinner=False)
