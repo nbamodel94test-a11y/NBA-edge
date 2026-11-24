@@ -894,6 +894,11 @@ with tab6:
                 season_avg = history[stat].mean()
 
                 prediction = 0.60 * last5 + 0.40 * last10
+                trend_prediction = (
+                    0.50 * last5
+                    + 0.30 * last10
+                    + 0.20 * season_avg
+                )
 
                 backtest_rows.append({
                     "Player": player_name,
