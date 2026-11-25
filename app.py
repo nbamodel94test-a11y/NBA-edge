@@ -1078,6 +1078,7 @@ with tab6:
             )
             .agg(
                 Tested_Games=("Actual", "count"),
+                Original_Model_MAE=("Absolute Error", "mean"),
                 Minutes_Model_MAE=("Minutes Absolute Error", "mean")
             )
             .reset_index()
@@ -1085,8 +1086,14 @@ with tab6:
 
         minutes_trend_summary = minutes_trend_summary.rename(columns={
             "Tested_Games": "Tested Games",
+            "Original_Model_MAE": "Original Model MAE",
             "Minutes_Model_MAE": "Minutes Model MAE"
         })
+
+        minutes_trend_summary["Difference"] = (
+            minutes_trend_summary["Minutes Model MAE"]
+            - minutes_trend_summary["Original Model MAE"]
+        )
 
         st.subheader("Accuracy by Minutes Trend")
         st.dataframe(
