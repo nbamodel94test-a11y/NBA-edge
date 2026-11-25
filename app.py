@@ -1181,31 +1181,7 @@ with tab6:
             .reset_index()
         )
 
-        reliable_role_summary = reliable_role_summary.rename(columns={
 
-
-
-
-                "Tested_Games": "Tested Games",
-                "Original_MAE": "Original MAE",
-                "Minutes_MAE": "Minutes MAE"
-            }
-        )
-
-        role_change_player_summary["Difference"] = (
-            role_change_player_summary["Minutes MAE"]
-            - role_change_player_summary["Original MAE"]
-        )
-
-        st.subheader("Player-Level Accuracy: Minutes Increased 5+")
-        st.dataframe(
-            role_change_player_summary.round(2).sort_values(
-                ["Stat", "Tested Games"],
-                ascending=[True, False]
-            ),
-            use_container_width=True,
-            hide_index=True
-        )
 
         reliable_role_players = role_change_player_summary[
             role_change_player_summary["Tested Games"] >= 3
