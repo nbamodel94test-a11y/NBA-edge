@@ -1109,13 +1109,7 @@ with tab6:
             hide_index=True
         )
 
-        role_change_players = backtest[
-            backtest["Minutes Trend"].isin([
-                "Increase 5 to 7",
-                "Increase 7 to 10"
-            ])
-        ]
-
+        role_change_players = backtest.copy()
         role_change_player_summary = (
             role_change_players.groupby(
                 ["Minutes Trend", "Player", "Stat"]
