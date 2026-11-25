@@ -1112,10 +1112,93 @@ with tab6:
         role_change_players = backtest[
             backtest["Minutes Trend"].isin([
                 "Increase 5 to 7",
-                "Increase 7 to 10",
-                "Increase 10+"
+                "Increase 7 to 10"
             ])
         ]
+
+        role_change_player_summary = (
+            role_change_players.groupby(
+                ["Minutes Trend", "Player", "Stat"]
+            )
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Original_MAE=("Absolute Error", "mean"),
+                Minutes_MAE=("Minutes Absolute Error", "mean")
+            )
+            .reset_index()
+        )
+
+        role_change_player_summary = role_change_player_summary.rename(
+            columns={
+                "Tested_Games": "Tested Games",
+                "Original_MAE": "Original MAE",
+                "Minutes_MAE": "Minutes MAE"
+            }
+        )
+
+        role_change_player_summary["Difference"] = (
+            role_change_player_summary["Minutes MAE"]
+            - role_change_player_summary["Original MAE"]
+        )
+
+        st.subheader("Player Accuracy: 5–7 Minute Increase")
+        st.dataframe(
+            role_change_player_summary[
+                role_change_player_summary["Minutes Trend"] == "Increase 5 to 7"
+            ].round(2).sort_values(
+                ["Stat", "Tested Games"],
+                ascending=[True, False]
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.subheader("Player Accuracy: 7–10 Minute Increase")
+        st.dataframe(
+            role_change_player_summary[
+                role_change_player_summary["Minutes Trend"] == "Increase 7 to 10"
+            ].round(2).sort_values(
+                ["Stat", "Tested Games"],
+                ascending=[True, False]
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        reliable_role_players = role_change_player_summary[
+            role_change_player_summary["Tested Games"] >= 3
+        ]
+
+        reliable_role_summary = (
+            reliable_role_players.groupby(["Minutes Trend", "Stat"])
+            .agg(
+                Players=("Player", "nunique"),
+                Tested_Games=("Tested Games", "sum"),
+                Original_MAE=("Original MAE", "mean"),
+                Minutes_MAE=("Minutes MAE", "mean"),
+                Players_Improved=("Difference", lambda x: (x < 0).sum())
+            )
+            .reset_index()
+        )
+
+        reliable_role_summary = reliable_role_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Original_MAE": "Original MAE",
+            "Minutes_MAE": "Minutes MAE",
+            "Players_Improved": "Players Improved"
+        })
+
+        reliable_role_summary["Difference"] = (
+            reliable_role_summary["Minutes MAE"]
+            - reliable_role_summary["Original MAE"]
+        )
+
+        st.subheader("Role Change Results: Players With 3+ Tests")
+        st.dataframe(
+            reliable_role_summary.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
 
         role_change_player_summary = (
             role_change_players.groupby(["Player", "Stat"])
