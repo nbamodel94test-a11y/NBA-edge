@@ -914,9 +914,21 @@ with tab6:
                 else:
                     minutes_trend = "Increase 10+"
                 projected_minutes = (
-                    0.50 * minutes5
-                    + 0.30 * minutes10
-                    + 0.20 * season_minutes
+                0.50 * minutes5
+                + 0.30 * minutes10
+                + 0.20 * season_minutes
+                 )
+
+                projected_minutes_60_25_15 = (
+                0.60 * minutes5
+                + 0.25 * minutes10
+                + 0.15 * season_minutes
+                )
+
+                projected_minutes_70_20_10 = (
+                0.70 * minutes5
+                + 0.20 * minutes10
+                + 0.10 * season_minutes
                 )
 
                 rate5 = (
