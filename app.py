@@ -1202,7 +1202,7 @@ with tab6:
 
 
 
-            columns={
+
                 "Tested_Games": "Tested Games",
                 "Original_MAE": "Original MAE",
                 "Minutes_MAE": "Minutes MAE"
