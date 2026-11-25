@@ -1183,21 +1183,7 @@ with tab6:
 
 
 
-        reliable_role_players = role_change_player_summary[
-            role_change_player_summary["Tested Games"] >= 3
-        ]
 
-        reliable_role_summary = (
-            reliable_role_players.groupby("Stat")
-            .agg(
-                Players=("Player", "nunique"),
-                Tested_Games=("Tested Games", "sum"),
-                Original_MAE=("Original MAE", "mean"),
-                Minutes_MAE=("Minutes MAE", "mean"),
-                Players_Improved=("Difference", lambda x: (x < 0).sum())
-            )
-            .reset_index()
-        )
 
 
 
