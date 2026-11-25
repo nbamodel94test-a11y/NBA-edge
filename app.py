@@ -1002,6 +1002,14 @@ with tab6:
                     "Minutes Projection Absolute Error": abs(
                         projected_minutes - valid_games.iloc[i]["minutes"]
                     ),
+                    "Minutes 60/25/15 Prediction": projected_minutes_60_25_15,
+                    "Minutes 60/25/15 Absolute Error": abs(
+                        projected_minutes_60_25_15 - valid_games.iloc[i]["minutes"]
+                    ),
+                    "Minutes 70/20/10 Prediction": projected_minutes_70_20_10,
+                    "Minutes 70/20/10 Absolute Error": abs(
+                        projected_minutes_70_20_10 - valid_games.iloc[i]["minutes"]
+                    ),
                     "Predicted Rate": (
                         0.50 * rate5
                         + 0.30 * rate10
