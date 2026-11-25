@@ -1201,15 +1201,7 @@ with tab6:
         )
 
 
-            .agg(
-                Tested_Games=("Actual", "count"),
-                Original_MAE=("Absolute Error", "mean"),
-                Minutes_MAE=("Minutes Absolute Error", "mean")
-            )
-            .reset_index()
-        )
 
-        role_change_player_summary = role_change_player_summary.rename(
             columns={
                 "Tested_Games": "Tested Games",
                 "Original_MAE": "Original MAE",
