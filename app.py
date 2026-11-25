@@ -907,8 +907,12 @@ with tab6:
                     minutes_trend = "Stable"
                 elif minutes_change <= 5:
                     minutes_trend = "Moderate Increase"
+                elif minutes_change <= 7:
+                    minutes_trend = "Increase 5 to 7"
+                elif minutes_change <= 10:
+                    minutes_trend = "Increase 7 to 10"
                 else:
-                    minutes_trend = "Major Increase"
+                    minutes_trend = "Increase 10+"
                 projected_minutes = (
                     0.50 * minutes5
                     + 0.30 * minutes10
