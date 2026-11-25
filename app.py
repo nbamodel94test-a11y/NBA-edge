@@ -1040,6 +1040,7 @@ with tab6:
 
     backtest = pd.DataFrame(backtest_rows)
 
+    if not backtest.empty:
         minutes_weight_summary = (
             backtest.groupby("Stat")
             .agg(
