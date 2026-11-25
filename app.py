@@ -1040,7 +1040,30 @@ with tab6:
 
     backtest = pd.DataFrame(backtest_rows)
 
-    if not backtest.empty:
+        minutes_weight_summary = (
+            backtest.groupby("Stat")
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Baseline_50_30_20=("Minutes Projection Absolute Error", "mean"),
+                Recent_60_25_15=("Minutes 60/25/15 Absolute Error", "mean"),
+                Recent_70_20_10=("Minutes 70/20/10 Absolute Error", "mean")
+            )
+            .reset_index()
+        )
+
+        minutes_weight_summary = minutes_weight_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Baseline_50_30_20": "50/30/20 Minutes MAE",
+            "Recent_60_25_15": "60/25/15 Minutes MAE",
+            "Recent_70_20_10": "70/20/10 Minutes MAE"
+        })
+
+        st.subheader("Comparing Minutes Weight Formulas")
+        st.dataframe(
+            minutes_weight_summary.round(3),
+            use_container_width=True,
+            hide_index=True
+        )
         st.subheader("Overall prediction accuracy")
 
         summary_rows = []
