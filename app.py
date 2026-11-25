@@ -1200,8 +1200,7 @@ with tab6:
             hide_index=True
         )
 
-        role_change_player_summary = (
-            role_change_players.groupby(["Player", "Stat"])
+
             .agg(
                 Tested_Games=("Actual", "count"),
                 Original_MAE=("Absolute Error", "mean"),
