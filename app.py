@@ -1150,6 +1150,41 @@ with tab6:
             hide_index=True
         )
 
+        reliable_role_players = role_change_player_summary[
+            role_change_player_summary["Tested Games"] >= 3
+        ]
+
+        reliable_role_summary = (
+            reliable_role_players.groupby("Stat")
+            .agg(
+                Players=("Player", "nunique"),
+                Tested_Games=("Tested Games", "sum"),
+                Original_MAE=("Original MAE", "mean"),
+                Minutes_MAE=("Minutes MAE", "mean"),
+                Players_Improved=("Difference", lambda x: (x < 0).sum())
+            )
+            .reset_index()
+        )
+
+        reliable_role_summary = reliable_role_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Original_MAE": "Original MAE",
+            "Minutes_MAE": "Minutes MAE",
+            "Players_Improved": "Players Improved"
+        })
+
+        reliable_role_summary["Difference"] = (
+            reliable_role_summary["Minutes MAE"]
+            - reliable_role_summary["Original MAE"]
+        )
+
+        st.subheader("Role Change Results: Players With 3+ Tests")
+        st.dataframe(
+            reliable_role_summary.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
+
         st.subheader("Player-level accuracy")
         player_accuracy = (
             backtest.groupby(["Player", "Stat"])
