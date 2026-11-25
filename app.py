@@ -1181,11 +1181,24 @@ with tab6:
             .reset_index()
         )
 
+        reliable_role_summary = reliable_role_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Original_MAE": "Original MAE",
+            "Minutes_MAE": "Minutes MAE",
+            "Players_Improved": "Players Improved"
+        })
 
+        reliable_role_summary["Difference"] = (
+            reliable_role_summary["Minutes MAE"]
+            - reliable_role_summary["Original MAE"]
+        )
 
-
-
-
+        st.subheader("Role Change Results: Players With 3+ Tests")
+        st.dataframe(
+            reliable_role_summary.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
 
         st.subheader("Player-level accuracy")
         player_accuracy = (
