@@ -1075,7 +1075,34 @@ with tab6:
             "MAE = average prediction error. RMSE penalizes larger errors. "
             "Positive bias means the model tends to overpredict."
         )
-        
+
+        component_summary = (
+            backtest.groupby("Stat")
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Minutes_MAE=("Minutes Projection Absolute Error", "mean"),
+                Rate_MAE=("Rate Absolute Error", "mean"),
+                Actual_Minutes=("Actual Minutes", "mean"),
+                Projected_Minutes=("Projected Minutes", "mean")
+            )
+            .reset_index()
+        )
+
+        component_summary = component_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Minutes_MAE": "Minutes MAE",
+            "Rate_MAE": "Rate MAE",
+            "Actual_Minutes": "Average Actual Minutes",
+            "Projected_Minutes": "Average Projected Minutes"
+        })
+
+        st.subheader("What Causes Projection Errors?")
+        st.dataframe(
+            component_summary.round(3),
+            use_container_width=True,
+            hide_index=True
+        )
+
         volatility_results = backtest.copy()
         volatility_results["Minutes Volatility Group"] = pd.qcut(
             volatility_results["Minutes Volatility"].rank(method="first"),
