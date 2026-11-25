@@ -1109,8 +1109,48 @@ with tab6:
             hide_index=True
         )
 
-        st.subheader("Player-level accuracy")
+        role_change_players = backtest[
+            backtest["Minutes Trend"].isin([
+                "Increase 5 to 7",
+                "Increase 7 to 10",
+                "Increase 10+"
+            ])
+        ]
 
+        role_change_player_summary = (
+            role_change_players.groupby(["Player", "Stat"])
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Original_MAE=("Absolute Error", "mean"),
+                Minutes_MAE=("Minutes Absolute Error", "mean")
+            )
+            .reset_index()
+        )
+
+        role_change_player_summary = role_change_player_summary.rename(
+            columns={
+                "Tested_Games": "Tested Games",
+                "Original_MAE": "Original MAE",
+                "Minutes_MAE": "Minutes MAE"
+            }
+        )
+
+        role_change_player_summary["Difference"] = (
+            role_change_player_summary["Minutes MAE"]
+            - role_change_player_summary["Original MAE"]
+        )
+
+        st.subheader("Player-Level Accuracy: Minutes Increased 5+")
+        st.dataframe(
+            role_change_player_summary.round(2).sort_values(
+                ["Stat", "Tested Games"],
+                ascending=[True, False]
+            ),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.subheader("Player-level accuracy")
         player_accuracy = (
             backtest.groupby(["Player", "Stat"])
             .agg(
