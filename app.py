@@ -1165,37 +1165,50 @@ with tab6:
             hide_index=True
         )
 
-        reliable_role_players = role_change_player_summary[
-            role_change_player_summary["Tested Games"] >= 3
-        ]
+        sample_size_summaries = []
 
-        reliable_role_summary = (
-            reliable_role_players.groupby(["Minutes Trend", "Stat"])
-            .agg(
-                Players=("Player", "nunique"),
-                Tested_Games=("Tested Games", "sum"),
-                Original_MAE=("Original MAE", "mean"),
-                Minutes_MAE=("Minutes MAE", "mean"),
-                Players_Improved=("Difference", lambda x: (x < 0).sum())
+        for minimum_tests in [1, 2, 3, 5]:
+            qualified_players = role_change_player_summary[
+                role_change_player_summary["Tested Games"] >= minimum_tests
+            ]
+
+            threshold_summary = (
+                qualified_players.groupby(["Minutes Trend", "Stat"])
+                .agg(
+                    Players=("Player", "nunique"),
+                    Tested_Games=("Tested Games", "sum"),
+                    Original_MAE=("Original MAE", "mean"),
+                    Minutes_MAE=("Minutes MAE", "mean"),
+                    Players_Improved=("Difference", lambda x: (x < 0).sum())
+                )
+                .reset_index()
             )
-            .reset_index()
+
+            threshold_summary["Minimum Tests per Player"] = minimum_tests
+            sample_size_summaries.append(threshold_summary)
+
+        sample_size_summary = pd.concat(
+            sample_size_summaries,
+            ignore_index=True
         )
 
-        reliable_role_summary = reliable_role_summary.rename(columns={
+        sample_size_summary = sample_size_summary.rename(columns={
             "Tested_Games": "Tested Games",
             "Original_MAE": "Original MAE",
             "Minutes_MAE": "Minutes MAE",
             "Players_Improved": "Players Improved"
         })
 
-        reliable_role_summary["Difference"] = (
-            reliable_role_summary["Minutes MAE"]
-            - reliable_role_summary["Original MAE"]
+        sample_size_summary["Difference"] = (
+            sample_size_summary["Minutes MAE"]
+            - sample_size_summary["Original MAE"]
         )
 
-        st.subheader("Role Change Results: Players With 3+ Tests")
+        st.subheader("Accuracy by Minimum Player Test Count")
         st.dataframe(
-            reliable_role_summary.round(2),
+            sample_size_summary.sort_values(
+                ["Minimum Tests per Player", "Minutes Trend", "Stat"]
+            ).round(2),
             use_container_width=True,
             hide_index=True
         )
