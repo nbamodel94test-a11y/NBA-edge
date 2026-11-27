@@ -997,6 +997,24 @@ with tab6:
                     "Trend Absolute Error": abs(trend_prediction - actual),
                     "Minutes Prediction": minutes_prediction,
                     "Minutes Absolute Error": abs(minutes_prediction - actual),
+                    "Minutes 60/25/15 Stat Prediction": (
+                        projected_minutes_60_25_15
+                        * (0.50 * rate5 + 0.30 * rate10 + 0.20 * season_rate)
+                    ),
+                    "Minutes 60/25/15 Stat Error": abs(
+                        projected_minutes_60_25_15
+                        * (0.50 * rate5 + 0.30 * rate10 + 0.20 * season_rate)
+                        - actual
+                    ),
+                    "Minutes 70/20/10 Stat Prediction": (
+                        projected_minutes_70_20_10
+                        * (0.50 * rate5 + 0.30 * rate10 + 0.20 * season_rate)
+                    ),
+                    "Minutes 70/20/10 Stat Error": abs(
+                        projected_minutes_70_20_10
+                        * (0.50 * rate5 + 0.30 * rate10 + 0.20 * season_rate)
+                        - actual
+                    ),
                     "Actual Minutes": valid_games.iloc[i]["minutes"],
                     "Projected Minutes": projected_minutes,
                     "Minutes Projection Absolute Error": abs(
