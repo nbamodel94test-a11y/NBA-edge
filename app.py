@@ -1125,8 +1125,75 @@ with tab6:
 
         holdout_results = pd.DataFrame(holdout_rows)
 
-        st.subheader("Out-of-Sample Personalized Formula Test")
+        all_dates = sorted(backtest["Game Date"].dropna().unique())
 
+        if len(all_dates) >= 2:
+            date_split = int(len(all_dates) * 0.70)
+            cutoff_date = all_dates[date_split]
+
+            global_training = backtest[
+                backtest["Game Date"] < cutoff_date
+            ]
+
+            global_holdout = backtest[
+                backtest["Game Date"] >= cutoff_date
+            ]
+
+            pooled_rows = []
+
+            for stat, stat_training in global_training.groupby("Stat"):
+                stat_holdout = global_holdout[
+                    global_holdout["Stat"] == stat
+                ]
+
+                if stat_training.empty or stat_holdout.empty:
+                    continue
+
+                formula_errors = {
+                    "50/30/20": "Minutes Absolute Error",
+                    "60/25/15": "Rate 60/25/15 Error",
+                    "70/20/10": "Rate 70/20/10 Error"
+                }
+
+                training_scores = {
+                    formula: stat_training[column].mean()
+                    for formula, column in formula_errors.items()
+                }
+
+                best_formula = min(
+                    training_scores,
+                    key=training_scores.get
+                )
+
+                selected_column = formula_errors[best_formula]
+
+                personalized_mae = stat_holdout[selected_column].mean()
+                standard_mae = stat_holdout[
+                    "Minutes Absolute Error"
+                ].mean()
+
+                pooled_rows.append({
+                    "Stat": stat,
+                    "Training Games": len(stat_training),
+                    "Holdout Games": len(stat_holdout),
+                    "Selected Formula": best_formula,
+                    "Pooled MAE": personalized_mae,
+                    "Standard MAE": standard_mae,
+                    "Difference": personalized_mae - standard_mae
+                })
+
+            pooled_results = pd.DataFrame(pooled_rows)
+
+            st.subheader("Pooled Out-of-Sample Formula Test")
+
+            if not pooled_results.empty:
+                st.dataframe(
+                    pooled_results.round(3),
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+        st.subheader("Out-of-Sample Personalized Formula Test")
         if not holdout_results.empty:
             st.dataframe(
                 holdout_results.round(3),
