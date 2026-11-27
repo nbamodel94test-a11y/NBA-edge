@@ -1134,7 +1134,44 @@ with tab6:
                 hide_index=True
             )
         else:
+        else:
             st.info("Not enough player history for the holdout test.")
+
+        if not holdout_results.empty:
+            holdout_summary = (
+                holdout_results.groupby("Stat")
+                .agg(
+                    Player_Groups=("Player", "count"),
+                    Holdout_Games=("Holdout Games", "sum"),
+                    Personalized_MAE=("Personalized MAE", "mean"),
+                    Standard_MAE=("Standard 50/30/20 MAE", "mean"),
+                    Groups_Improved=(
+                        "Difference",
+                        lambda values: (values < 0).sum()
+                    )
+                )
+                .reset_index()
+            )
+
+            holdout_summary = holdout_summary.rename(columns={
+                "Player_Groups": "Player-Stat Groups",
+                "Holdout_Games": "Holdout Games",
+                "Personalized_MAE": "Personalized MAE",
+                "Standard_MAE": "Standard 50/30/20 MAE",
+                "Groups_Improved": "Groups Improved"
+            })
+
+            holdout_summary["Difference"] = (
+                holdout_summary["Personalized MAE"]
+                - holdout_summary["Standard 50/30/20 MAE"]
+            )
+
+            st.subheader("Overall Holdout Results")
+            st.dataframe(
+                holdout_summary.round(3),
+                use_container_width=True,
+                hide_index=True
+            )
 
         stat_weight_summary = (
             backtest.groupby("Stat")
