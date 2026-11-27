@@ -1134,7 +1134,6 @@ with tab6:
                 hide_index=True
             )
         else:
-        else:
             st.info("Not enough player history for the holdout test.")
 
         if not holdout_results.empty:
