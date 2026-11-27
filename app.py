@@ -995,6 +995,7 @@ with tab6:
                 backtest_rows.append({
                     "Player": player_name,
                     "Stat": stat.title(),
+                    "Game Date": valid_games.iloc[i]["date"],
                     "Prediction": prediction,
                     "Actual": actual,
                     "Error": prediction - actual,
