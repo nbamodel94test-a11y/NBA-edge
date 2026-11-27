@@ -1059,6 +1059,31 @@ with tab6:
     backtest = pd.DataFrame(backtest_rows)
 
     if not backtest.empty:
+        stat_weight_summary = (
+            backtest.groupby("Stat")
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Baseline_50_30_20=("Minutes Absolute Error", "mean"),
+                Recent_60_25_15=("Minutes 60/25/15 Stat Error", "mean"),
+                Recent_70_20_10=("Minutes 70/20/10 Stat Error", "mean")
+            )
+            .reset_index()
+        )
+
+        stat_weight_summary = stat_weight_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Baseline_50_30_20": "50/30/20 Stat MAE",
+            "Recent_60_25_15": "60/25/15 Stat MAE",
+            "Recent_70_20_10": "70/20/10 Stat MAE"
+        })
+
+        st.subheader("Stat Accuracy by Minutes Formula")
+        st.dataframe(
+            stat_weight_summary.round(3),
+            use_container_width=True,
+            hide_index=True
+        )
+
         minutes_weight_summary = (
             backtest.groupby("Stat")
             .agg(
