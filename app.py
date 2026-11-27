@@ -1080,6 +1080,62 @@ with tab6:
     backtest = pd.DataFrame(backtest_rows)
 
     if not backtest.empty:
+        holdout_rows = []
+
+        for (player, stat), player_games in backtest.groupby(
+            ["Player", "Stat"], sort=False
+        ):
+            player_games = player_games.sort_values("Game Date")
+
+            split_index = int(len(player_games) * 0.70)
+
+            training = player_games.iloc[:split_index]
+            holdout = player_games.iloc[split_index:]
+
+            if len(training) < 10 or len(holdout) < 3:
+                continue
+
+            formula_errors = {
+                "50/30/20": "Minutes Absolute Error",
+                "60/25/15": "Rate 60/25/15 Error",
+                "70/20/10": "Rate 70/20/10 Error"
+            }
+
+            training_scores = {
+                formula: training[column].mean()
+                for formula, column in formula_errors.items()
+            }
+
+            best_formula = min(training_scores, key=training_scores.get)
+            selected_error_column = formula_errors[best_formula]
+
+            personalized_mae = holdout[selected_error_column].mean()
+            standard_mae = holdout["Minutes Absolute Error"].mean()
+
+            holdout_rows.append({
+                "Player": player,
+                "Stat": stat,
+                "Training Games": len(training),
+                "Holdout Games": len(holdout),
+                "Selected Formula": best_formula,
+                "Personalized MAE": personalized_mae,
+                "Standard 50/30/20 MAE": standard_mae,
+                "Difference": personalized_mae - standard_mae
+            })
+
+        holdout_results = pd.DataFrame(holdout_rows)
+
+        st.subheader("Out-of-Sample Personalized Formula Test")
+
+        if not holdout_results.empty:
+            st.dataframe(
+                holdout_results.round(3),
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.info("Not enough player history for the holdout test.")
+
         stat_weight_summary = (
             backtest.groupby("Stat")
             .agg(
