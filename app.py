@@ -1154,6 +1154,60 @@ with tab6:
             hide_index=True
         )
 
+        player_rate_summary = (
+            backtest.groupby(["Player", "Stat"])
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Baseline_50_30_20=("Minutes Absolute Error", "mean"),
+                Recent_60_25_15=("Rate 60/25/15 Error", "mean"),
+                Recent_70_20_10=("Rate 70/20/10 Error", "mean")
+            )
+            .reset_index()
+        )
+
+        player_rate_summary = player_rate_summary[
+            player_rate_summary["Tested_Games"] >= 10
+        ].copy()
+
+        player_rate_summary = player_rate_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Baseline_50_30_20": "50/30/20 MAE",
+            "Recent_60_25_15": "60/25/15 MAE",
+            "Recent_70_20_10": "70/20/10 MAE"
+        })
+
+        player_rate_columns = [
+            "50/30/20 MAE",
+            "60/25/15 MAE",
+            "70/20/10 MAE"
+        ]
+
+        player_rate_summary["Best Formula"] = (
+            player_rate_summary[player_rate_columns]
+            .idxmin(axis=1)
+        )
+
+        st.subheader("Production-Rate Accuracy by Player")
+        st.dataframe(
+            player_rate_summary.round(3),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        player_rate_wins = (
+            player_rate_summary["Best Formula"]
+            .value_counts()
+            .rename_axis("Best Formula")
+            .reset_index(name="Player-Stat Groups")
+        )
+
+        st.subheader("Which Formula Wins by Player?")
+        st.dataframe(
+            player_rate_wins,
+            use_container_width=True,
+            hide_index=True
+        )
+
         st.subheader("Overall prediction accuracy")
 
         summary_rows = []
