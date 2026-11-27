@@ -1128,6 +1128,32 @@ with tab6:
             use_container_width=True,
             hide_index=True
         )
+
+        rate_weight_summary = (
+            backtest.groupby("Stat")
+            .agg(
+                Tested_Games=("Actual", "count"),
+                Baseline_50_30_20=("Minutes Absolute Error", "mean"),
+                Recent_60_25_15=("Rate 60/25/15 Error", "mean"),
+                Recent_70_20_10=("Rate 70/20/10 Error", "mean")
+            )
+            .reset_index()
+        )
+
+        rate_weight_summary = rate_weight_summary.rename(columns={
+            "Tested_Games": "Tested Games",
+            "Baseline_50_30_20": "50/30/20 Rate MAE",
+            "Recent_60_25_15": "60/25/15 Rate MAE",
+            "Recent_70_20_10": "70/20/10 Rate MAE"
+        })
+
+        st.subheader("Stat Accuracy by Production-Rate Formula")
+        st.dataframe(
+            rate_weight_summary.round(3),
+            use_container_width=True,
+            hide_index=True
+        )
+
         st.subheader("Overall prediction accuracy")
 
         summary_rows = []
